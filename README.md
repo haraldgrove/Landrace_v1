@@ -56,6 +56,6 @@ Create a new contig by concatenating the two HiFi contigs, using the Flye contig
 samtools faidx sample.hifi.fasta hifi_contig1 > part1.fasta
 samtools faidx sample.hifi.fasta hifi_contig2 > part3.fasta
 samtools faidx sample.flye.fasta flye_contig:start-end > part2.fasta
-cat part1.fasta part2.fasta part3.fasta > merged_contig.fasta
+seqkit seq -s part1.fasta part2.fasta part3.fasta | tr -d '\n' | (echo ">merged_contig"; cat; echo) > Landrace_V1.fasta
 ```
 `start` and `end` are extracted from the alignment file.
