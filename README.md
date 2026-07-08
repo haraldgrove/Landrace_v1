@@ -5,35 +5,44 @@ Scripts used for the creation and analysis of the Landrace_v1 assembly.
 
 ### Flye
 
-Reads were filtered using Filtlong:
+Reads were filtered using Filtlong
 ```
-filtlong --min_length 4000 --keep_percent 90 sample.fq.gz | pigz -p4 > sample.filtered.fq.gz
+filtlong --min_length 4000 --keep_percent 90 Landrace_V1.ONT_rawreads.fq.gz | pigz -p4 > Landrace_V1.ONT_rawreads.filtered.fq.gz
 ```
 
 Filtered ONT reads were assembled into contigs using Flye (v 2.9.1-b1780) 
 ```
 flye \
-  --nano-raw sample.filtered.fq.gz \
+  --nano-raw Landrace_V1.ONT_rawreads.filtered.fq.gz \
   --min-overlap 20000 \
   --genome-size 2.5g \
-  --out-dir sample.flye.outdir \
+  --out-dir Landrace_V1_20k_flye \
   --asm-coverage 40 \
   -t 30
 ```
-The “--asm-coverage” flag was set to 40 to reduce the memory consumption in the initial disjoining step
-A range of required read overlaps (--min-overlap flag) were used (5k, 7k, 10k, 15k, 20k, 25k and 30k) to produce multiple independent assemblies. 
+The `--asm-coverage` flag was set to 40 to reduce the memory consumption in the initial disjoining step
+A range of required read overlaps (`--min-overlap` flag) were used (5k, 7k, 10k, 15k, 20k, 25k and 30k) to produce multiple independent assemblies. 
 
-### HiFIasm
+### HiFiasm
 
-A different assembly was created with ONT reads and HiFi reads using HiFiasm v 0.19.6-r595 default settings.
+Raw reads from PacBio HiFi were filtered with hifiadapterfilt
 ```
-hifiasm -o sample_hifiasm -t 30 --ul sample.filtered.fq.gz sample.hifi.fq.gz
+bash hifiadapterfilt.sh -p Landrace_V1.hifi_rawreads -t 30
+```
+
+Main assembly was created with filtered ONT reads and filtered HiFi reads using HiFiasm (v 0.19.6-r595) with default settings
+```
+hifiasm \
+  -o Landrace_hifiasm \
+  -t 30 \
+  --ul Landrace_V1.ONT_rawreads.filtered.fq.gz \
+  Landrace_V1.hifi_rawreads.filt.fastq.gz
 ```
 
 ### Merging
 Align HiFi assembly contigs against Flye assembly contigs.
 ```
-<software> sample.flye.fasta sample.hifi.fasta
+<software> Landrace_V1_20k.flye.fasta Landrace_V1.hifi.fasta
 ```
 
 Identify possible cases for merging:
